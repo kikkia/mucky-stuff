@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace MuckModTest {
+    [Serializable]
     public class ChestWrapper {
         public int id { get; }
         public List<String> items { get; }
