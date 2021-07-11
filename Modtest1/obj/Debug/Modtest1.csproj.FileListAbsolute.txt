@@ -1,0 +1,13 @@
+D:\Projects\Muck\TestMod1\Modtest1\Modtest1\bin\Debug\Modtest1.dll
+D:\Projects\Muck\TestMod1\Modtest1\Modtest1\bin\Debug\Modtest1.pdb
+D:\Projects\Muck\TestMod1\Modtest1\Modtest1\bin\Debug\0Harmony.dll
+D:\Projects\Muck\TestMod1\Modtest1\Modtest1\bin\Debug\Assembly-CSharp.dll
+D:\Projects\Muck\TestMod1\Modtest1\Modtest1\bin\Debug\BepInEx.dll
+D:\Projects\Muck\TestMod1\Modtest1\Modtest1\bin\Debug\BepInEx.Harmony.dll
+D:\Projects\Muck\TestMod1\Modtest1\Modtest1\bin\Debug\UnityEngine.CoreModule.dll
+D:\Projects\Muck\TestMod1\Modtest1\Modtest1\bin\Debug\UnityEngine.dll
+D:\Projects\Muck\TestMod1\Modtest1\Modtest1\obj\Debug\Modtest1.csprojAssemblyReference.cache
+D:\Projects\Muck\TestMod1\Modtest1\Modtest1\obj\Debug\Modtest1.csproj.CoreCompileInputs.cache
+D:\Projects\Muck\TestMod1\Modtest1\Modtest1\obj\Debug\Modtest1.csproj.CopyComplete
+D:\Projects\Muck\TestMod1\Modtest1\Modtest1\obj\Debug\Modtest1.dll
+D:\Projects\Muck\TestMod1\Modtest1\Modtest1\obj\Debug\Modtest1.pdb
