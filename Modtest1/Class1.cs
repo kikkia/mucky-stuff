@@ -17,7 +17,16 @@ namespace MuckModTest {
         private String seedPath = "maps/seed.txt";
         public bool done = false;
 
-        private List<String> weWantThese = new List<string> { "Night Blade", "Gronks Sword"};
+        private Dictionary<String, int> weWantThese = new Dictionary<string, int>() {
+            {"Night Blade", 250},
+            {"Gronks Sword", 200},
+            {"Adamantite Ore", 30},
+            {"Oak Wood", 30},
+            {"Mithril Ore", 20},
+            {"Adamantite Axe", 30},
+            {"Obamium Ore", 30},
+            {"rope", 5}
+        };
         
         private void Awake() {
             if (instance == null) {
@@ -25,6 +34,11 @@ namespace MuckModTest {
             } else {
                 Destroy(this);
             }
+            
+            weWantThese["Adamantite Ore"] = 30;
+            weWantThese["Oak Wood"] = 30;
+            weWantThese["Mithril Ore"] = 20;
+            weWantThese["Adamantite Axe"] = 50;
 
             chests = new Dictionary<int, ChestWrapper>();
             seed = getSeed();
@@ -45,22 +59,17 @@ namespace MuckModTest {
         }
 
         public void parseResults() {
-            var ladiesAndGentlemenWeGotEm = false;
+            var score = 0;
             foreach (var chest in chests.Values) {
                 foreach (var item in chest.items) {
-                    if (weWantThese.Contains(item)) {
-                        ladiesAndGentlemenWeGotEm = true;
-                        break;
+                    if (weWantThese.ContainsKey(item)) {
+                        score += weWantThese[item];
                     }
                 }
-                if (ladiesAndGentlemenWeGotEm) {
-                    break;
-                }
             }
-            logSource.LogInfo("=============== Chest Data Seed: " + seed + " ==============");
 
-            if (ladiesAndGentlemenWeGotEm) {
-                String path = "maps/data" + seed + ".json";
+            if (score > 200) {
+                String path = "maps/" + score + "." + seed + ".txt";
                 StreamWriter writer = new StreamWriter(path, false);
                 logSource.LogInfo("=============== Chest Data Seed: " + seed + " ==============");
                 foreach(var keyPair in chests) {
