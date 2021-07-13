@@ -1,0 +1,6 @@
+﻿*.cache
+*.pdb
+*.user
+
+
+.idea/
