@@ -5,6 +5,7 @@ using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
 using UnityEngine;
+using UnityEngine.Profiling.Experimental;
 
 namespace MuckModTest {
     [BepInPlugin("me.kikkia.test", "testMod", "1.0.0")]
@@ -15,7 +16,7 @@ namespace MuckModTest {
         public Dictionary<int, ChestWrapper> chests;
         public int seed;
         private String seedPath = "maps/seed.txt";
-        public bool done = false;
+        public int frame = 0; // Counts frames to wait before completing
 
         private Dictionary<String, int> weWantThese = new Dictionary<string, int>() {
             {"Night Blade", 250},
@@ -100,17 +101,26 @@ namespace MuckModTest {
             writer.Close();
             seed++;
         }
+
+        public void generateMap() {
+            Boat.Instance.UpdateShipStatus(Boat.BoatPackets.FindShip, 0);
+            Boat.Instance.UpdateShipStatus(Boat.BoatPackets.MarkGems, 0);
+            Map.Instance.ToggleMap(); 
+            ScreenCapture.CaptureScreenshot(Directory.GetCurrentDirectory() + "/maps/map_" + seed + ".png");
+        }
     }
 
     class MovementPatch {
         [HarmonyPatch(typeof(PlayerMovement), "Movement")]
         [HarmonyPrefix]
         static bool PrefixMovement() {
-            if (!MainClass.instance.done) {
+            if (MainClass.instance.frame > 3) {
+                MainClass.instance.generateMap();
                 MainClass.instance.parseResults();
                 GameManager.instance.LeaveGame();
-                MainClass.instance.done = true;
+                MainClass.instance.frame = 0;
             }
+            MainClass.instance.frame++;
             return true;
         }
     }
@@ -147,8 +157,8 @@ namespace MuckModTest {
         [HarmonyPatch(typeof(SteamLobby), "FindSeed")]
         [HarmonyPostfix]
         static void PostfixFindSeed(ref int __result) {
-            __result = MainClass.instance.seed; // TODO: Make seed management function
-            MainClass.instance.done = false;
+            __result = MainClass.instance.seed;
+            MainClass.instance.frame = 0;
         }
     }
 }
