@@ -1,18 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Experimental.GlobalIllumination;
 
 namespace MuckModTest {
     [Serializable]
     public class ChestWrapper {
         public int id { get; }
         public List<String> items { get; }
-        public float x { get; }
-        public float y { get; }
+        
+        public Transform transform;
 
-        public ChestWrapper(float x, float y, int id) {
+        public ChestWrapper(Transform transform, int id) {
             this.id = id;
-            this.x = x;
-            this.y = y;
+            this.transform = transform;
             items = new List<string>();
         }
         

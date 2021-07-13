@@ -17,6 +17,7 @@ namespace MuckModTest {
         public int seed;
         private String seedPath = "maps/seed.txt";
         public int frame = 0; // Counts frames to wait before completing
+        public int SCORE_THRESHOLD = 200;
 
         private Dictionary<String, int> weWantThese = new Dictionary<string, int>() {
             {"Night Blade", 250},
@@ -28,14 +29,15 @@ namespace MuckModTest {
             {"Obamium Ore", 30},
             {"rope", 5}
         };
-        
+
         private void Awake() {
             if (instance == null) {
                 instance = this;
-            } else {
+            }
+            else {
                 Destroy(this);
             }
-            
+
             weWantThese["Adamantite Ore"] = 30;
             weWantThese["Oak Wood"] = 30;
             weWantThese["Mithril Ore"] = 20;
@@ -59,33 +61,40 @@ namespace MuckModTest {
             harmony.UnpatchSelf();
         }
 
-        public void parseResults() {
+        public bool parseResults() {
             var score = 0;
             foreach (var chest in chests.Values) {
                 foreach (var item in chest.items) {
                     if (weWantThese.ContainsKey(item)) {
                         score += weWantThese[item];
                     }
+
+                    if (item == "Night Blade" || item == "Gronks Sword") {
+                        markSword(chest, item);
+                    }
                 }
             }
 
-            if (score > 200) {
+            if (score > SCORE_THRESHOLD) {
                 String path = "maps/" + score + "." + seed + ".txt";
                 StreamWriter writer = new StreamWriter(path, false);
                 logSource.LogInfo("=============== Chest Data Seed: " + seed + " ==============");
-                foreach(var keyPair in chests) {
+                foreach (var keyPair in chests) {
                     if (keyPair.Value != null) {
-                        writer.WriteLine("Chest " + keyPair.Key + ": " + keyPair.Value.x + ":" + 
-                                         keyPair.Value.y + " " + String.Join(", ", keyPair.Value.items));
-                    } else {
+                        Vector3 position = keyPair.Value.transform.position;
+                        writer.WriteLine("Chest " + keyPair.Key + ": " + position.x + ":" +
+                                         position.y + " " + String.Join(", ", keyPair.Value.items));
+                    }
+                    else {
                         writer.WriteLine("The fuck, Null value for chest " + keyPair.Key);
                     }
                 }
+
                 writer.Close();
             }
-            
+
             chests.Clear();
-            incrementSeed();
+            return score > SCORE_THRESHOLD;
         }
 
         private int getSeed() {
@@ -95,7 +104,7 @@ namespace MuckModTest {
             return toReturn;
         }
 
-        private void incrementSeed() {
+        public void incrementSeed() {
             StreamWriter writer = new StreamWriter(seedPath, false);
             writer.WriteLine(seed);
             writer.Close();
@@ -105,8 +114,22 @@ namespace MuckModTest {
         public void generateMap() {
             Boat.Instance.UpdateShipStatus(Boat.BoatPackets.FindShip, 0);
             Boat.Instance.UpdateShipStatus(Boat.BoatPackets.MarkGems, 0);
-            Map.Instance.ToggleMap(); 
+            Map.Instance.ToggleMap();
             ScreenCapture.CaptureScreenshot(Directory.GetCurrentDirectory() + "/maps/map_" + seed + ".png");
+        }
+
+        /**
+         * Marks a good sword on the map
+         */
+        private void markSword(ChestWrapper c, String name) {
+            markItem(c, name, Color.black);
+        }
+
+        /**
+         * Marks a custom mapper on the map
+         */
+        private void markItem(ChestWrapper c, String name, Color color) {
+            Map.Instance.AddMarker(c.transform, Map.MarkerType.Gem, Boat.Instance.gemTexture, color, name);
         }
     }
 
@@ -115,8 +138,12 @@ namespace MuckModTest {
         [HarmonyPrefix]
         static bool PrefixMovement() {
             if (MainClass.instance.frame > 3) {
-                MainClass.instance.generateMap();
-                MainClass.instance.parseResults();
+                // If positive match, then generate map image
+                if (MainClass.instance.parseResults()) {
+                    MainClass.instance.generateMap();
+                    MainClass.instance.incrementSeed();
+                }
+
                 GameManager.instance.LeaveGame();
                 MainClass.instance.frame = 0;
             }
@@ -129,8 +156,7 @@ namespace MuckModTest {
         [HarmonyPatch(typeof(ChestManager), "AddChest")]
         [HarmonyPrefix]
         static bool PrefixChestAdd(Chest c, int id) {
-            Vector3 position = c.gameObject.transform.position;
-            MainClass.instance.chests.Add(id, new ChestWrapper(position.x, position.y, id));
+            MainClass.instance.chests.Add(id, new ChestWrapper(c.gameObject.transform, id));
             return true;
         }
     }
@@ -159,6 +185,17 @@ namespace MuckModTest {
         static void PostfixFindSeed(ref int __result) {
             __result = MainClass.instance.seed;
             MainClass.instance.frame = 0;
+        }
+    }
+    
+    /**
+     * Patches out the tree and rock generation to speed up world gen
+     */
+    class ForestGenPatch {
+        [HarmonyPatch(typeof(ResourceGenerator), "GenerateForest")]
+        [HarmonyPrefix]
+        static bool PrefixGen() {
+            return false;
         }
     }
 }
