@@ -53,6 +53,7 @@ namespace MuckModTest {
             harmony.PatchAll(typeof(SetGetSeedPatch));
             harmony.PatchAll(typeof(ChestAddPatch));
             harmony.PatchAll(typeof(MovementPatch));
+            harmony.PatchAll(typeof(ForestGenPatch));
 
             logSource.LogInfo("Mod loaded");
         }
@@ -141,11 +142,11 @@ namespace MuckModTest {
                 // If positive match, then generate map image
                 if (MainClass.instance.parseResults()) {
                     MainClass.instance.generateMap();
-                    MainClass.instance.incrementSeed();
                 }
 
                 GameManager.instance.LeaveGame();
                 MainClass.instance.frame = 0;
+                MainClass.instance.incrementSeed();
             }
             MainClass.instance.frame++;
             return true;
